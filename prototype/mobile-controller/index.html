@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BloodLine Controller</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .joystick-zone {
+            width: 40%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .joystick-base {
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        .joystick-stick {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .action-zone {
+            width: 50%;
+            height: 100%;
+            position: relative;
+        }
+
+        .btn {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.5);
+            background: transparent;
+            transition: background 0.1s, transform 0.1s;
+        }
+
+        /* Minimalist text, maybe match the aesthetic */
+        .btn::after {
+            content: attr(data-action);
+            font-family: monospace;
+        }
+
+        /* Diamond Layout */
+        #btn-Y { top: 20%; left: 50%; transform: translateX(-50%); }
+        #btn-X { top: 50%; left: 20%; transform: translateY(-50%); }
+        #btn-B { top: 50%; right: 20%; transform: translateY(-50%); }
+        #btn-A { bottom: 20%; left: 50%; transform: translateX(-50%); }
+
+        .status {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 2px;
+            font-family: monospace;
+            z-index: 10;
+        }
+
+        #orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #000;
+            color: #ff3333;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: monospace;
+            font-size: 20px;
+            padding: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @media screen and (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="orientation-warning">
+        [ SYSTEM OVERRIDE REQUIRED ]<br><br>
+        ROTATE DEVICE TO LANDSCAPE
+    </div>
+    <div class="status" id="status">CONNECTING...</div>
+    
+    <div class="joystick-zone" id="joystick-zone">
+        <div class="joystick-base" id="joystick-base">
+            <div class="joystick-stick" id="joystick-stick"></div>
+        </div>
+    </div>
+
+    <div class="action-zone">
+        <div class="btn" id="btn-Y" data-action="Y"></div> <!-- Top -->
+        <div class="btn" id="btn-X" data-action="X"></div> <!-- Left -->
+        <div class="btn" id="btn-B" data-action="B"></div> <!-- Right -->
+        <div class="btn" id="btn-A" data-action="A"></div> <!-- Bottom -->
+    </div>
+
+    <script src="controller.js"></script>
+</body>
+</html>

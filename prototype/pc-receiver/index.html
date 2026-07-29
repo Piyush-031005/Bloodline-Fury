@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLine PC Receiver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: #030303;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1a24 0%, #030303 100%);
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            margin-bottom: 10px;
+            letter-spacing: 12px;
+            color: #ffffff;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .status {
+            margin-bottom: 40px;
+            color: #666;
+            font-weight: 300;
+            letter-spacing: 4px;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+
+        /* Premium Visualizer */
+        .visualizer {
+            display: flex;
+            gap: 80px;
+            margin-bottom: 40px;
+            background: rgba(20, 20, 25, 0.5);
+            padding: 40px 60px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .v-joy {
+            width: 120px; height: 120px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            position: relative;
+        }
+        .v-stick {
+            width: 16px; height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s linear;
+            box-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 50px 50px 50px;
+            grid-template-rows: 50px 50px 50px;
+            gap: 15px;
+            align-items: center;
+            justify-items: center;
+        }
+        .v-btn {
+            width: 50px; height: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 50%;
+            font-weight: 300;
+            color: rgba(255,255,255,0.3);
+            transition: all 0.1s;
+            font-size: 14px;
+        }
+        .v-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.6);
+            transform: scale(0.95);
+            font-weight: 600;
+        }
+
+        #vb-Y { grid-column: 2; grid-row: 1; }
+        #vb-X { grid-column: 1; grid-row: 2; }
+        #vb-B { grid-column: 3; grid-row: 2; }
+        #vb-A { grid-column: 2; grid-row: 3; }
+
+        #log {
+            width: 60%;
+            height: 20vh;
+            background: transparent;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.8;
+            color: #555;
+            font-family: monospace;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="title">BLOODLINE FURY</div>
+    <div class="status" id="status">Awaiting Synchronisation...</div>
+    
+    <div class="visualizer">
+        <div class="v-joy">
+            <div class="v-stick" id="v-stick"></div>
+        </div>
+        <div class="btn-group">
+            <div class="v-btn" id="vb-Y">Y</div>
+            <div class="v-btn" id="vb-X">X</div>
+            <div class="v-btn" id="vb-A">A</div>
+            <div class="v-btn" id="vb-B">B</div>
+        </div>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        
+        let ws;
+        
+        function connect() {
+            ws = new WebSocket(`${protocol}//${window.location.host}/receiver-ws`);
+
+            ws.onopen = () => {
+                statusEl.innerText = 'Connected. Waiting for Mobile Controller...';
+                statusEl.style.color = '#7a7a7a';
+            };
+
+            ws.onclose = () => {
+                statusEl.innerText = 'Signal Lost. Retrying...';
+                statusEl.style.color = '#aa3333';
+                setTimeout(connect, 2000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'button_down') {
+                    const btn = document.getElementById(`vb-${data.value}`);
+                    if (btn) btn.classList.add('active');
+                    logMsg(`STRIKE INITIATED [ ${data.value} ]`);
+                } else if (data.type === 'button_up') {
+                    const btn = document.getElementById(`vb-${data.value}`);
+                    if (btn) btn.classList.remove('active');
+                } else if (data.type === 'joystick') {
+                    const stick = document.getElementById('v-stick');
+                    const max = 50; // pixels
+                    const tx = data.value.x * max;
+                    const ty = -data.value.y * max;
+                    stick.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+                    
+                    if(Math.abs(data.value.x) > 0.1 || Math.abs(data.value.y) > 0.1) {
+                         logMsg(`MOVEMENT REGISTERED [ X:${data.value.x.toFixed(2)} Y:${data.value.y.toFixed(2)} ]`);
+                    }
+                }
+            };
+        }
+
+        function logMsg(msg) {
+            const el = document.createElement('div');
+            el.innerText = `> ${msg}`;
+            logEl.prepend(el);
+            if (logEl.children.length > 20) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+
+        connect();
+    </script>
+</body>
+</html>
