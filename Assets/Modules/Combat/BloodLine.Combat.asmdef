@@ -1,0 +1,16 @@
+{
+    "name": "BloodLine.Combat",
+    "rootNamespace": "BloodLine.Combat",
+    "references": [
+        "BloodLine.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

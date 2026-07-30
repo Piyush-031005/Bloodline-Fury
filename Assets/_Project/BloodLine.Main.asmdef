@@ -1,0 +1,19 @@
+{
+    "name": "BloodLine.Main",
+    "rootNamespace": "BloodLine.Main",
+    "references": [
+        "BloodLine.Core",
+        "BloodLine.Combat",
+        "BloodLine.Multiplayer",
+        "BloodLine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

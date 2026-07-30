@@ -1,0 +1,16 @@
+{
+    "name": "BloodLine.UI",
+    "rootNamespace": "BloodLine.UI",
+    "references": [
+        "BloodLine.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
