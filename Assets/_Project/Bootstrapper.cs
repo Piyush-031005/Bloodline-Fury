@@ -83,40 +83,25 @@ namespace BloodLine.Main
             {
                 if (state == GameState.Gameplay)
                 {
-                    // Initialize Player Pawn
-                    PlayerPawn playerPawn = null;
-                    var playerGO = GameObject.Find("Temporary Player Capsule");
-                    if (playerGO != null)
-                    {
-                        playerPawn = playerGO.GetComponent<PlayerPawn>();
-                        if (playerPawn == null) playerPawn = playerGO.AddComponent<PlayerPawn>();
-                        
-                        playerPawn.Inject(registry.Get<IUpdateLoop>(), registry.Get<IInputService>(), registry.Get<MoveBank>(), registry.Get<IGameConfiguration>().TargetTickRate);
-                        
-                        // Setup Combat Debugger
-                        var combatLogger = playerGO.AddComponent<CombatDebugLogger>();
-                        combatLogger.Inject(registry.Get<IUpdateLoop>(), playerPawn);
-                        
-                        logger.Log("[Bootstrapper] PlayerPawn and CombatDebugLogger initialized successfully.", LogLevel.Info);
-                    }
-                    else
-                    {
-                        logger.Log("[Bootstrapper] Temporary Player Capsule not found in scene.", LogLevel.Warning);
-                    }
-
                     // Initialize Cinematography Engine
                     var mainCamera = Camera.main;
-                    if (mainCamera != null && playerPawn != null)
+                    if (mainCamera != null)
                     {
-                        var director = mainCamera.gameObject.GetComponent<CameraDirectorPawn>();
-                        if (director == null) director = mainCamera.gameObject.AddComponent<CameraDirectorPawn>();
+                        var playerGO = GameObject.Find("Temporary Player Capsule");
+                        var pPawn = playerGO != null ? playerGO.GetComponent<PlayerPawn>() : null;
                         
-                        director.Inject(registry.Get<IUpdateLoop>(), playerPawn, registry.Get<IGameConfiguration>().TargetTickRate);
-                        logger.Log("[Bootstrapper] CameraDirectorPawn initialized successfully.", LogLevel.Info);
+                        if (pPawn != null)
+                        {
+                            var director = mainCamera.gameObject.GetComponent<CameraDirectorPawn>();
+                            if (director == null) director = mainCamera.gameObject.AddComponent<CameraDirectorPawn>();
+                            
+                            director.Inject(registry.Get<IUpdateLoop>(), pPawn, registry.Get<IGameConfiguration>().TargetTickRate);
+                            logger.Log("[Bootstrapper] CameraDirectorPawn initialized successfully.", LogLevel.Info);
+                        }
                     }
                     else
                     {
-                        logger.Log("[Bootstrapper] Main Camera or PlayerPawn not found. Cannot initialize Cinematography Engine.", LogLevel.Warning);
+                        logger.Log("[Bootstrapper] Main Camera not found. Cannot initialize Cinematography Engine.", LogLevel.Warning);
                     }
                 }
                 else if (state == GameState.Loading)
@@ -133,6 +118,9 @@ namespace BloodLine.Main
                         var existingBootCam = GameObject.Find("Boot Camera");
                         if (existingBootCam != null) Object.Destroy(existingBootCam);
                         
+                        // We must initialize the coordinator even if scene is already loaded
+                        InitializeCharacterCoordinator(registry, logger);
+
                         stateMachine.ChangeState(GameState.Gameplay);
                         return;
                     }
@@ -159,6 +147,8 @@ namespace BloodLine.Main
                                 Object.Destroy(bootCam);
                             }
 
+                            InitializeCharacterCoordinator(registry, logger);
+
                             stateMachine.ChangeState(GameState.Gameplay);
                         };
                     }
@@ -173,6 +163,55 @@ namespace BloodLine.Main
             stateMachine.ChangeState(GameState.Loading);
 
             Debug.Log("====== BOOTSTRAPPER INIT END ======");
+        }
+
+        private static void InitializeCharacterCoordinator(ServiceRegistry registry, IGameLogger logger)
+        {
+            var playerGO = GameObject.Find("Temporary Player Capsule");
+            if (playerGO != null)
+            {
+                var playerPawn = playerGO.GetComponent<PlayerPawn>();
+                if (playerPawn == null) playerPawn = playerGO.AddComponent<PlayerPawn>();
+
+                // Set up initial state logic before ticking
+                var initialState = new CharacterState
+                {
+                    Position = playerPawn.transform.position,
+                    Velocity = Vector3.zero,
+                    IsGrounded = false,
+                    Combat = BloodLine.Modules.Combat.State.CombatState.Default()
+                };
+
+                // Create pure C# Coordinator
+                var coordinator = new CharacterSimulationCoordinator(
+                    initialState,
+                    registry.Get<MoveBank>(),
+                    5f, // Move Speed
+                    registry.Get<IGameConfiguration>().TargetTickRate
+                );
+
+                // Wire up input explicitly inside the update loop for the coordinator
+                var updateLoop = registry.Get<IUpdateLoop>();
+                var inputService = registry.Get<IInputService>();
+                
+                updateLoop.OnTick += () =>
+                {
+                    coordinator.Tick(inputService);
+                };
+
+                // Inject Coordinator into Presentation Bridges
+                playerPawn.Inject(updateLoop, coordinator);
+                
+                var combatLogger = playerGO.GetComponent<CombatDebugLogger>();
+                if (combatLogger == null) combatLogger = playerGO.AddComponent<CombatDebugLogger>();
+                combatLogger.Inject(updateLoop, playerPawn);
+                
+                logger.Log("[Bootstrapper] CharacterSimulationCoordinator and PlayerPawn initialized successfully.", LogLevel.Info);
+            }
+            else
+            {
+                logger.Log("[Bootstrapper] Temporary Player Capsule not found in scene.", LogLevel.Warning);
+            }
         }
     }
 }
