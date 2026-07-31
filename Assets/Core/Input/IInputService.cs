@@ -6,5 +6,6 @@ namespace BloodLine.Core.Input
     {
         Vector2 GetMovementDirection();
         bool GetJumpInput();
+        bool GetAttackInput();
     }
 }

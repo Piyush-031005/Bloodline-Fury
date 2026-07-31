@@ -8,6 +8,7 @@ namespace BloodLine.Core.Input
     {
         private InputAction _moveAction;
         private InputAction _jumpAction;
+        private InputAction _attackAction;
 
         public UnityInputService()
         {
@@ -22,8 +23,14 @@ namespace BloodLine.Core.Input
             _jumpAction.AddBinding("<Keyboard>/space");
             _jumpAction.AddBinding("<Gamepad>/buttonSouth");
 
+            _attackAction = new InputAction(name: "Attack", type: InputActionType.Button);
+            _attackAction.AddBinding("<Mouse>/leftButton");
+            _attackAction.AddBinding("<Keyboard>/j");
+            _attackAction.AddBinding("<Gamepad>/buttonWest");
+
             _moveAction.Enable();
             _jumpAction.Enable();
+            _attackAction.Enable();
         }
 
         public void Dispose()
@@ -33,6 +40,9 @@ namespace BloodLine.Core.Input
             
             _jumpAction?.Disable();
             _jumpAction?.Dispose();
+
+            _attackAction?.Disable();
+            _attackAction?.Dispose();
         }
 
         public Vector2 GetMovementDirection()
@@ -44,6 +54,11 @@ namespace BloodLine.Core.Input
         {
             // Returns true only on the frame the button is pressed (Phase 1 simplicity)
             return _jumpAction.triggered;
+        }
+
+        public bool GetAttackInput()
+        {
+            return _attackAction.triggered;
         }
     }
 }

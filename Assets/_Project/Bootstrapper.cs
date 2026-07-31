@@ -8,6 +8,9 @@ using BloodLine.Core.Input;
 using BloodLine.Presentation;
 using BloodLine.Modules.Character;
 using BloodLine.Modules.Cinematography;
+using BloodLine.Modules.Combat.Data;
+using BloodLine.Modules.Combat.Presentation;
+using BloodLine.Modules.Combat.Simulation;
 
 namespace BloodLine.Main
 {
@@ -52,6 +55,23 @@ namespace BloodLine.Main
             var inputService = new UnityInputService();
             registry.Register<IInputService>(inputService);
 
+            // 6.5. Initialize Combat Data
+            var moveBank = new MoveBank();
+            
+            // --- Mock Data Initialization for Milestone 2 ---
+            var punchMove = ScriptableObject.CreateInstance<MoveDefinition>();
+            punchMove.MoveID = "Punch";
+            punchMove.FrameData = new FrameData
+            {
+                StartupFrames = 12,
+                ActiveFrames = 4,
+                RecoveryFrames = 14
+            };
+            moveBank.RegisterMove(punchMove);
+            // -------------------------------------------------
+
+            registry.Register<MoveBank>(moveBank);
+
             // 7. Spawn Update Loop Runner
             var loopRunnerGO = new GameObject("[SYSTEM] UpdateLoopRunner");
             Object.DontDestroyOnLoad(loopRunnerGO);
@@ -71,8 +91,13 @@ namespace BloodLine.Main
                         playerPawn = playerGO.GetComponent<PlayerPawn>();
                         if (playerPawn == null) playerPawn = playerGO.AddComponent<PlayerPawn>();
                         
-                        playerPawn.Inject(registry.Get<IUpdateLoop>(), registry.Get<IInputService>(), registry.Get<IGameConfiguration>().TargetTickRate);
-                        logger.Log("[Bootstrapper] PlayerPawn initialized successfully.", LogLevel.Info);
+                        playerPawn.Inject(registry.Get<IUpdateLoop>(), registry.Get<IInputService>(), registry.Get<MoveBank>(), registry.Get<IGameConfiguration>().TargetTickRate);
+                        
+                        // Setup Combat Debugger
+                        var combatLogger = playerGO.AddComponent<CombatDebugLogger>();
+                        combatLogger.Inject(registry.Get<IUpdateLoop>(), playerPawn);
+                        
+                        logger.Log("[Bootstrapper] PlayerPawn and CombatDebugLogger initialized successfully.", LogLevel.Info);
                     }
                     else
                     {
