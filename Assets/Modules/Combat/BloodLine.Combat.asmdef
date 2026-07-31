@@ -2,7 +2,8 @@
     "name": "BloodLine.Combat",
     "rootNamespace": "BloodLine.Combat",
     "references": [
-        "BloodLine.Core"
+        "BloodLine.Core",
+        "BloodLine.Cinematography"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

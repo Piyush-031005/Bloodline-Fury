@@ -29,7 +29,8 @@ namespace BloodLine.Modules.Character
             {
                 Position = transform.position,
                 Velocity = Vector3.zero,
-                IsGrounded = false
+                IsGrounded = false,
+                Combat = CombatState.Default()
             };
 
             _updateLoop.OnTick += HandleTick;
