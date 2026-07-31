@@ -2,7 +2,9 @@
     "name": "BloodLine.Character",
     "rootNamespace": "BloodLine.Modules.Character",
     "references": [
-        "BloodLine.Core"
+        "BloodLine.Core",
+        "BloodLine.Combat",
+        "BloodLine.Animation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

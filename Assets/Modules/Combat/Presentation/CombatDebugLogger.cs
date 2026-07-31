@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using BloodLine.Core.Simulation;
-using BloodLine.Modules.Character;
 using BloodLine.Modules.Combat.State;
 
 namespace BloodLine.Modules.Combat.Presentation
@@ -12,13 +12,13 @@ namespace BloodLine.Modules.Combat.Presentation
     public class CombatDebugLogger : MonoBehaviour
     {
         private IUpdateLoop _updateLoop;
-        private PlayerPawn _playerPawn;
+        private Func<CombatState> _getCombatState;
         private CombatState _previousState;
 
-        public void Inject(IUpdateLoop updateLoop, PlayerPawn playerPawn)
+        public void Inject(IUpdateLoop updateLoop, Func<CombatState> getCombatState)
         {
             _updateLoop = updateLoop;
-            _playerPawn = playerPawn;
+            _getCombatState = getCombatState;
             _previousState = CombatState.Default();
 
             _updateLoop.OnTick += HandleTick;
@@ -34,9 +34,9 @@ namespace BloodLine.Modules.Combat.Presentation
 
         private void HandleTick()
         {
-            if (_playerPawn == null) return;
+            if (_getCombatState == null) return;
 
-            var currentState = _playerPawn.CurrentState.Combat;
+            var currentState = _getCombatState();
 
             // Only log if something interesting is happening to prevent console flooding
             if (currentState.CurrentPhase != CombatPhase.Neutral || _previousState.CurrentPhase != CombatPhase.Neutral)

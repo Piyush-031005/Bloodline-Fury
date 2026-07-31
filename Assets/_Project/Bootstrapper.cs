@@ -96,7 +96,7 @@ namespace BloodLine.Main
                             var director = mainCamera.gameObject.GetComponent<CameraDirectorPawn>();
                             if (director == null) director = mainCamera.gameObject.AddComponent<CameraDirectorPawn>();
                             
-                            director.Inject(registry.Get<IUpdateLoop>(), pPawn, registry.Get<IGameConfiguration>().TargetTickRate);
+                            director.Inject(registry.Get<IUpdateLoop>(), () => pPawn.CurrentState.Position, registry.Get<IGameConfiguration>().TargetTickRate);
                             logger.Log("[Bootstrapper] CameraDirectorPawn initialized successfully.", LogLevel.Info);
                         }
                     }
@@ -205,11 +205,11 @@ namespace BloodLine.Main
                 
                 var combatLogger = playerGO.GetComponent<CombatDebugLogger>();
                 if (combatLogger == null) combatLogger = playerGO.AddComponent<CombatDebugLogger>();
-                combatLogger.Inject(updateLoop, playerPawn);
+                combatLogger.Inject(updateLoop, () => playerPawn.CurrentState.Combat);
                 
                 var animDriver = playerGO.GetComponent<AnimationDriver>();
                 if (animDriver == null) animDriver = playerGO.AddComponent<AnimationDriver>();
-                animDriver.Inject(updateLoop, playerPawn);
+                animDriver.Inject(updateLoop, () => playerPawn.CurrentState.AnimState);
                 
                 logger.Log("[Bootstrapper] CharacterSimulationCoordinator, PlayerPawn, and Presentation Bridges initialized successfully.", LogLevel.Info);
             }

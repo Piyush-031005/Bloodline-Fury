@@ -1,6 +1,6 @@
 using UnityEngine;
 using BloodLine.Modules.Combat.State;
-using BloodLine.Modules.Animation.State;
+using AnimationState = BloodLine.Modules.Animation.State.AnimationState;
 
 namespace BloodLine.Modules.Character
 {

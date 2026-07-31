@@ -2,11 +2,12 @@ using BloodLine.Modules.Character;
 using BloodLine.Modules.Combat.State;
 using BloodLine.Modules.Animation.State;
 
-namespace BloodLine.Modules.Animation.Simulation
+namespace BloodLine.Modules.Character.Simulation
 {
     /// <summary>
     /// Pure C# stateless function that determines the Animation Intent based solely on physical and combat reality.
     /// It NEVER modifies physics or combat state.
+    /// Owned by the Character assembly.
     /// </summary>
     public static class AnimationStateResolver
     {

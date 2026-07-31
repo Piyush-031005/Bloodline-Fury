@@ -1,6 +1,5 @@
 using UnityEngine;
 using BloodLine.Core.Input;
-using BloodLine.Modules.Character;
 using BloodLine.Modules.Combat.Data;
 using BloodLine.Modules.Combat.State;
 
@@ -12,13 +11,13 @@ namespace BloodLine.Modules.Combat.Simulation
     /// </summary>
     public class CombatSimulationEngine
     {
-        public CharacterState Tick(CharacterState state, IInputService input, MoveBank moveBank)
+        public CombatState Tick(CombatState state, IInputService input, MoveBank moveBank)
         {
             // 1. Input Evaluation (if neutral)
             state = EvaluateInput(state, input, moveBank);
 
             // If a move is active, execute the pipeline
-            if (state.Combat.CurrentPhase != CombatPhase.Neutral)
+            if (state.CurrentPhase != CombatPhase.Neutral)
             {
                 // 2. Move Advancement
                 state = AdvanceMoveTime(state);
@@ -33,65 +32,65 @@ namespace BloodLine.Modules.Combat.Simulation
             return state;
         }
 
-        private CharacterState EvaluateInput(CharacterState state, IInputService input, MoveBank moveBank)
+        private CombatState EvaluateInput(CombatState state, IInputService input, MoveBank moveBank)
         {
             // Only evaluate new attacks if Neutral (Cancel windows handled later)
-            if (state.Combat.CurrentPhase == CombatPhase.Neutral)
+            if (state.CurrentPhase == CombatPhase.Neutral)
             {
                 if (input.GetAttackInput())
                 {
                     // Start a hardcoded "Punch" for this milestone
                     if (moveBank.TryGetMove("Punch", out MoveDefinition move))
                     {
-                        state.Combat.ActiveMoveID = "Punch";
-                        state.Combat.CurrentMoveFrame = 0;
-                        state.Combat.CurrentPhase = CombatPhase.Startup;
+                        state.ActiveMoveID = "Punch";
+                        state.CurrentMoveFrame = 0;
+                        state.CurrentPhase = CombatPhase.Startup;
                     }
                 }
             }
             return state;
         }
 
-        private CharacterState AdvanceMoveTime(CharacterState state)
+        private CombatState AdvanceMoveTime(CombatState state)
         {
-            if (state.Combat.HitstopFramesRemaining > 0)
+            if (state.HitstopFramesRemaining > 0)
             {
-                state.Combat.HitstopFramesRemaining--;
+                state.HitstopFramesRemaining--;
                 return state; // Frozen, do not advance move
             }
 
-            state.Combat.CurrentMoveFrame++;
+            state.CurrentMoveFrame++;
             return state;
         }
 
-        private CharacterState EvaluatePhase(CharacterState state, MoveBank moveBank)
+        private CombatState EvaluatePhase(CombatState state, MoveBank moveBank)
         {
-            if (!moveBank.TryGetMove(state.Combat.ActiveMoveID, out MoveDefinition move))
+            if (!moveBank.TryGetMove(state.ActiveMoveID, out MoveDefinition move))
             {
                 // Move doesn't exist, hard reset
-                state.Combat = CombatState.Default();
+                state = CombatState.Default();
                 return state;
             }
 
-            int currentFrame = state.Combat.CurrentMoveFrame;
+            int currentFrame = state.CurrentMoveFrame;
             var frameData = move.FrameData;
 
             if (currentFrame > frameData.TotalFrames)
             {
                 // Move is completely finished
-                state.Combat = CombatState.Default();
+                state = CombatState.Default();
             }
             else if (currentFrame > frameData.StartupFrames + frameData.ActiveFrames)
             {
-                state.Combat.CurrentPhase = CombatPhase.Recovery;
+                state.CurrentPhase = CombatPhase.Recovery;
             }
             else if (currentFrame > frameData.StartupFrames)
             {
-                state.Combat.CurrentPhase = CombatPhase.Active;
+                state.CurrentPhase = CombatPhase.Active;
             }
             else
             {
-                state.Combat.CurrentPhase = CombatPhase.Startup;
+                state.CurrentPhase = CombatPhase.Startup;
             }
 
             return state;

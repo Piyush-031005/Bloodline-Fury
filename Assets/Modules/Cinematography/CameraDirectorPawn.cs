@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using BloodLine.Core.Simulation;
-using BloodLine.Modules.Character;
 
 namespace BloodLine.Modules.Cinematography
 {
@@ -11,7 +11,7 @@ namespace BloodLine.Modules.Cinematography
     public class CameraDirectorPawn : MonoBehaviour
     {
         private IUpdateLoop _updateLoop;
-        private PlayerPawn _targetPlayer;
+        private Func<Vector3> _getTargetPosition;
         
         private ShotComposer _composer;
         private CameraState _state;
@@ -20,10 +20,10 @@ namespace BloodLine.Modules.Cinematography
 
         private Camera _unityCamera;
 
-        public void Inject(IUpdateLoop updateLoop, PlayerPawn targetPlayer, int targetTickRate)
+        public void Inject(IUpdateLoop updateLoop, Func<Vector3> getTargetPosition, int targetTickRate)
         {
             _updateLoop = updateLoop;
-            _targetPlayer = targetPlayer;
+            _getTargetPosition = getTargetPosition;
             _fixedDeltaTime = 1f / targetTickRate;
 
             _composer = new ShotComposer();
@@ -51,10 +51,10 @@ namespace BloodLine.Modules.Cinematography
 
         private void HandleTick()
         {
-            if (_composer == null || _targetPlayer == null || _unityCamera == null) return;
+            if (_composer == null || _getTargetPosition == null || _unityCamera == null) return;
 
             // 1. Gameplay -> Intent -> Composer -> Camera State
-            _state = _composer.Compose(_state, _currentIntent, _targetPlayer.CurrentState.Position, _fixedDeltaTime);
+            _state = _composer.Compose(_state, _currentIntent, _getTargetPosition(), _fixedDeltaTime);
 
             // 2. Presentation Bridge: Apply State
             transform.position = _state.Position;

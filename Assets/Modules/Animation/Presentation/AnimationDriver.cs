@@ -1,7 +1,7 @@
+using System;
 using UnityEngine;
 using BloodLine.Core.Simulation;
-using BloodLine.Modules.Character;
-using BloodLine.Modules.Animation.State;
+using AnimationState = BloodLine.Modules.Animation.State.AnimationState;
 
 namespace BloodLine.Modules.Animation.Presentation
 {
@@ -14,13 +14,13 @@ namespace BloodLine.Modules.Animation.Presentation
         [SerializeField] private Animator _animator;
         
         private IUpdateLoop _updateLoop;
-        private PlayerPawn _playerPawn;
+        private Func<AnimationState> _getAnimationState;
         private AnimationState _previousState;
 
-        public void Inject(IUpdateLoop updateLoop, PlayerPawn playerPawn)
+        public void Inject(IUpdateLoop updateLoop, Func<AnimationState> getAnimationState)
         {
             _updateLoop = updateLoop;
-            _playerPawn = playerPawn;
+            _getAnimationState = getAnimationState;
             
             // Temporary auto-binding if not set in inspector
             if (_animator == null)
@@ -41,9 +41,9 @@ namespace BloodLine.Modules.Animation.Presentation
 
         private void HandleTick()
         {
-            if (_playerPawn == null) return;
+            if (_getAnimationState == null) return;
 
-            AnimationState currentState = _playerPawn.CurrentState.AnimState;
+            AnimationState currentState = _getAnimationState();
 
             if (currentState != _previousState)
             {

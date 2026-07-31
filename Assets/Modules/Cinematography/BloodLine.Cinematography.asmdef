@@ -2,8 +2,7 @@
     "name": "BloodLine.Cinematography",
     "rootNamespace": "BloodLine.Modules.Cinematography",
     "references": [
-        "BloodLine.Core",
-        "BloodLine.Character"
+        "BloodLine.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
