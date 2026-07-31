@@ -1,5 +1,6 @@
 using BloodLine.Core.Input;
 using BloodLine.Modules.Combat.Simulation;
+using BloodLine.Modules.Animation.Simulation;
 
 namespace BloodLine.Modules.Character
 {
@@ -36,7 +37,10 @@ namespace BloodLine.Modules.Character
             // 2. Movement Engine (Pure Logic)
             nextState = _movementEngine.Tick(nextState, input, _fixedDeltaTime);
 
-            // 3. Finalize State
+            // 3. Resolve Animation State (Pure Logic)
+            nextState.AnimState = AnimationStateResolver.Resolve(nextState);
+
+            // 4. Finalize State
             CurrentState = nextState;
         }
     }

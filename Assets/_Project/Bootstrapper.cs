@@ -11,6 +11,7 @@ using BloodLine.Modules.Cinematography;
 using BloodLine.Modules.Combat.Data;
 using BloodLine.Modules.Combat.Presentation;
 using BloodLine.Modules.Combat.Simulation;
+using BloodLine.Modules.Animation.Presentation;
 
 namespace BloodLine.Main
 {
@@ -206,7 +207,11 @@ namespace BloodLine.Main
                 if (combatLogger == null) combatLogger = playerGO.AddComponent<CombatDebugLogger>();
                 combatLogger.Inject(updateLoop, playerPawn);
                 
-                logger.Log("[Bootstrapper] CharacterSimulationCoordinator and PlayerPawn initialized successfully.", LogLevel.Info);
+                var animDriver = playerGO.GetComponent<AnimationDriver>();
+                if (animDriver == null) animDriver = playerGO.AddComponent<AnimationDriver>();
+                animDriver.Inject(updateLoop, playerPawn);
+                
+                logger.Log("[Bootstrapper] CharacterSimulationCoordinator, PlayerPawn, and Presentation Bridges initialized successfully.", LogLevel.Info);
             }
             else
             {

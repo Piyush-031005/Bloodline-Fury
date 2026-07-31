@@ -1,5 +1,6 @@
 using UnityEngine;
 using BloodLine.Modules.Combat.State;
+using BloodLine.Modules.Animation.State;
 
 namespace BloodLine.Modules.Character
 {
@@ -13,5 +14,6 @@ namespace BloodLine.Modules.Character
         public Vector3 Velocity;
         public bool IsGrounded;
         public CombatState Combat;
+        public AnimationState AnimState;
     }
 }
