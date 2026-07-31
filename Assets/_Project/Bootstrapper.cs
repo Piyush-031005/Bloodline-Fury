@@ -1,5 +1,8 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using BloodLine.Core;
+using BloodLine.Core.Simulation;
+using BloodLine.Core.Simulation.State;
 using BloodLine.Core.Configuration;
 using BloodLine.Presentation;
 
@@ -9,7 +12,7 @@ namespace BloodLine.Main
     {
         private ServiceRegistry _registry;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Init()
         {
             // Explicit Unity debug to guarantee it shows up in raw logs
@@ -33,6 +36,46 @@ namespace BloodLine.Main
             var logger = registry.Get<IGameLogger>();
             logger.Log($"BloodLine Fury: Core Architecture Bootstrapped Successfully. Target Tick Rate: {registry.Get<IGameConfiguration>().TargetTickRate}", LogLevel.Info);
             
+            // 4. Initialize Game State Machine
+            var stateMachine = new GameStateMachine(logger);
+            registry.Register<IGameStateMachine>(stateMachine);
+
+            // 5. Initialize Update Loop
+            var updateLoop = new GameUpdateLoop(logger, stateMachine);
+            registry.Register<IUpdateLoop>(updateLoop);
+            updateLoop.Initialize(config.TargetTickRate);
+
+            // 6. Spawn Update Loop Runner
+            var loopRunnerGO = new GameObject("[SYSTEM] UpdateLoopRunner");
+            Object.DontDestroyOnLoad(loopRunnerGO);
+            var runner = loopRunnerGO.AddComponent<UpdateLoopRunner>();
+            runner.Inject(updateLoop);
+
+            // 7. Wire Scene Loading to State Machine
+            stateMachine.OnStateChanged += (state) =>
+            {
+                if (state == GameState.Loading)
+                {
+                    logger.Log("[Bootstrapper] Triggering Scene Load for Simulation...", LogLevel.Info);
+                    var asyncOp = SceneManager.LoadSceneAsync("Simulation", LoadSceneMode.Additive);
+                    if (asyncOp != null)
+                    {
+                        asyncOp.completed += _ =>
+                        {
+                            logger.Log("[Bootstrapper] Simulation Scene loaded successfully.", LogLevel.Info);
+                            stateMachine.ChangeState(GameState.Gameplay);
+                        };
+                    }
+                    else
+                    {
+                        logger.Log("[Bootstrapper] Failed to trigger Simulation scene load. Check Build Settings.", LogLevel.Error);
+                    }
+                }
+            };
+
+            // 8. Test State Transition to trigger the loading chain
+            stateMachine.ChangeState(GameState.Loading);
+
             Debug.Log("====== BOOTSTRAPPER INIT END ======");
         }
     }
