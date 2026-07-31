@@ -1,8 +1,8 @@
 {
-    "name": "BloodLine.Core",
-    "rootNamespace": "BloodLine.Core",
+    "name": "BloodLine.Character",
+    "rootNamespace": "BloodLine.Modules.Character",
     "references": [
-        "Unity.InputSystem"
+        "BloodLine.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

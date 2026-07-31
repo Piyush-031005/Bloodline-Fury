@@ -5,7 +5,9 @@
         "BloodLine.Core",
         "BloodLine.Combat",
         "BloodLine.Multiplayer",
-        "BloodLine.UI"
+        "BloodLine.UI",
+        "BloodLine.Character",
+        "BloodLine.Cinematography"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

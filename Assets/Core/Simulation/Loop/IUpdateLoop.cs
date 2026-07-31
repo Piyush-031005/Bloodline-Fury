@@ -6,6 +6,7 @@ namespace BloodLine.Core.Simulation
     /// </summary>
     public interface IUpdateLoop
     {
+        event System.Action OnTick;
         void Initialize(int targetTickRate);
         void Update(float deltaTime);
     }

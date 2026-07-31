@@ -1,8 +1,9 @@
 {
-    "name": "BloodLine.Core",
-    "rootNamespace": "BloodLine.Core",
+    "name": "BloodLine.Cinematography",
+    "rootNamespace": "BloodLine.Modules.Cinematography",
     "references": [
-        "Unity.InputSystem"
+        "BloodLine.Core",
+        "BloodLine.Character"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

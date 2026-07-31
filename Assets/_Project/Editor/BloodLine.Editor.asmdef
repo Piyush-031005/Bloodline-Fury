@@ -3,7 +3,8 @@
     "rootNamespace": "BloodLine.Editor",
     "references": [
         "BloodLine.Main",
-        "BloodLine.Core"
+        "BloodLine.Core",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
     "includePlatforms": [
         "Editor"

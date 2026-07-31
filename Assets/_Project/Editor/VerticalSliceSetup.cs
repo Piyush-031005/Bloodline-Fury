@@ -18,6 +18,15 @@ namespace BloodLine.Editor
             // Create Boot Scene
             var bootScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             string bootPath = "Assets/_Project/Scenes/Boot.unity";
+
+            // Add a Boot Camera to prevent "No cameras rendering" during async load
+            var bootCamGO = new GameObject("Boot Camera");
+            var bootCam = bootCamGO.AddComponent<Camera>();
+            bootCam.backgroundColor = Color.black;
+            bootCam.clearFlags = CameraClearFlags.SolidColor;
+            bootCam.cullingMask = 0; // FIX: Render nothing to prevent HDRP shadow conflicts
+            bootCamGO.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
+
             EditorSceneManager.SaveScene(bootScene, bootPath);
 
             // Create Simulation Scene
@@ -62,7 +71,11 @@ namespace BloodLine.Editor
                 new EditorBuildSettingsScene(simPath, true)
             };
 
-            Debug.Log("[VerticalSliceSetup] Created Boot and Simulation scenes, populated test environment, and added to Build Settings.");
+            // Force Play Mode to ALWAYS start from Boot scene
+            var bootAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(bootPath);
+            EditorSceneManager.playModeStartScene = bootAsset;
+
+            Debug.Log("[VerticalSliceSetup] Created Boot and Simulation scenes, configured cameras, and enforced Boot start scene.");
 
             // Reload Boot scene to be ready for Play Mode
             EditorSceneManager.OpenScene(bootPath);

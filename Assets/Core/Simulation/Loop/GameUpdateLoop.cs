@@ -5,6 +5,8 @@ namespace BloodLine.Core.Simulation
 {
     public class GameUpdateLoop : IUpdateLoop
     {
+        public event System.Action OnTick;
+        
         private readonly IGameLogger _logger;
         private readonly IGameStateMachine _stateMachine;
         
@@ -50,6 +52,7 @@ namespace BloodLine.Core.Simulation
         private void Tick()
         {
             _tickCount++;
+            OnTick?.Invoke();
             // Future logic: Push tick event to TimeSystem or GameStateMachine
         }
     }
