@@ -45,6 +45,12 @@ namespace BloodLine.Editor
             {
                 mainCam.transform.position = new Vector3(0, 3, -7);
                 mainCam.transform.LookAt(Vector3.up * 1f);
+                
+                // Add HDRP Camera Data to fix "No cameras rendering"
+                if (mainCam.GetComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>() == null)
+                {
+                    mainCam.gameObject.AddComponent<UnityEngine.Rendering.HighDefinition.HDAdditionalCameraData>();
+                }
             }
 
             EditorSceneManager.SaveScene(simScene, simPath);

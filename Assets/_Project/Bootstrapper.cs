@@ -63,6 +63,14 @@ namespace BloodLine.Main
                         asyncOp.completed += _ =>
                         {
                             logger.Log("[Bootstrapper] Simulation Scene loaded successfully.", LogLevel.Info);
+
+                            // Make Simulation the active scene so new objects prioritize it
+                            var simScene = SceneManager.GetSceneByName("Simulation");
+                            if (simScene.IsValid() && simScene.isLoaded)
+                            {
+                                SceneManager.SetActiveScene(simScene);
+                            }
+
                             stateMachine.ChangeState(GameState.Gameplay);
                         };
                     }
