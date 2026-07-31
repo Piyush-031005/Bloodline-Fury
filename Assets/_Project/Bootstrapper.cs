@@ -12,7 +12,7 @@ namespace BloodLine.Main
     {
         private ServiceRegistry _registry;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Init()
         {
             // Explicit Unity debug to guarantee it shows up in raw logs
