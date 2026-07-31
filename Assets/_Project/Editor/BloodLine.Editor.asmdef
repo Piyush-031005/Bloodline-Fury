@@ -2,7 +2,8 @@
     "name": "BloodLine.Editor",
     "rootNamespace": "BloodLine.Editor",
     "references": [
-        "BloodLine.Main"
+        "BloodLine.Main",
+        "BloodLine.Core"
     ],
     "includePlatforms": [
         "Editor"
